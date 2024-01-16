@@ -1,4 +1,5 @@
 global _start
+extern printf
 section .text
 
 _start:
@@ -13,17 +14,21 @@ mov rdi, filename
 mov rsi, 0; Read only
 mov rdx, 0
 syscall
-mov r8, rax
+mov r15, rax
 
 ; allocate mem with mmap
 %define ENOMEM 12
 %define buflen 1000
+%define MAP_ANONYMOUS        0x20
+%define MAP_PRIVATE        0x02
 mov rax, 9
 mov rdi, 0
-mov rsi, 10000000000000; Intentionally cause ENOMEM
+;mov rsi, 1000000000000; Intentionally cause ENOMEM
 mov rsi, buflen
 mov rdx, 2; prot=PROT_WRITE
-mov r10, 2; flags=MAP_PRIVATE
+mov r10, MAP_ANONYMOUS + MAP_PRIVATE; flags=MAP_PRIVATE
+mov r8, 0
+mov r9, 0
 syscall
 
 cmp rax, -ENOMEM
@@ -37,17 +42,16 @@ mov r9, rax
 
 
 mov rax, 0
-mov rdi, r8
+mov rdi, r15
 mov rsi, r9
 mov rdx, buflen
 syscall
 
-mov rax, 1
-mov rdi, 1
-mov rsi, r9
-mov rdx, buflen
-syscall
+; Less elegantly, print with printf
+mov rdi, r9
+call printf
 
+; exit 0
 mov rax, 60
 mov rdi, 0
 syscall
