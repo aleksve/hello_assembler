@@ -19,7 +19,8 @@ mov r8, rax
 %define ENOMEM 12
 %define buflen 1000
 %define buflen 1000*1000*1000  ; Intentionally cause ENOMEM
-%define buflen 100*1000*1000*1000  ; Intentionally cause ENOMEM
+;%define buflen 100*1000*1000*1000  ; Intentionally cause ENOMEM
+
 mov rax, 9
 mov rdi, 0
 mov rsi, buflen
@@ -51,14 +52,16 @@ cmp rax, r10
 jne loop
 
 ; Sleep
+jmp endsleep
 %define syscall_nanosleep 0x23
 mov rax, syscall_nanosleep
-push dword 5; Seconds
+push dword 1; Seconds
 push dword 0; Millisecond
 mov rdi, rsp
 add rdi, 8
 mov rsi, 0
 syscall
+endsleep:
 
 mov rax, 0
 mov rdi, r8
@@ -66,10 +69,12 @@ mov rsi, r9
 mov rdx, buflen
 syscall
 
+mov rdx, rax
+
 mov rax, 1
 mov rdi, 1
 mov rsi, r9
-mov rdx, buflen
+;mov rdx, buflen
 syscall
 
 mov rax, 60
